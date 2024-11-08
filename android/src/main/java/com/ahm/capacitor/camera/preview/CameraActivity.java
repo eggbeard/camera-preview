@@ -42,6 +42,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.lang.*;
+
 
 public class CameraActivity extends Fragment {
 
@@ -874,37 +876,60 @@ public class CameraActivity extends Fragment {
   ) {
     Log.d(TAG, "Requested picture size: " + width + "x" + height);
     Log.d(TAG, "Preview size: " + previewSize.width + "x" + previewSize.height);
+    Log.d(TAG, "Debug001 Pre Exact: ");
 
-    // If width and height are provided and non-zero, find an exact match
-    if (width > 0 && height > 0) {
-      for (Camera.Size size : supportedSizes) {
-        if (size.width == width && size.height == height) {
-          Log.d(TAG, "Exact match found: " + size.width + "x" + size.height);
-          return size;
-        }
+    // If 1920x1440
+    for (Camera.Size size : supportedSizes) {
+      Log.d(
+              TAG,
+              "Debug001 Checking For EXACT " + size.width + "x" + size.height
+      );
+      if (size.width == 1920 && size.height == 1440) {
+        Log.d(TAG, "Exact match found: " + size.width + "x" + size.height);
+        return size;
       }
     }
 
     // If no exact match found, find the optimal size based on aspect ratio and max pixels
-    double targetRatio = (double) previewSize.width / previewSize.height;
+    double targetRatio = (double) 4 / 3;
     Camera.Size optimalSize = null;
     double minDiff = Double.MAX_VALUE;
     long maxPixels = 0;
 
     for (Camera.Size size : supportedSizes) {
       double ratio = (double) size.width / size.height;
+        Log.d(
+        TAG,
+        "Debug001 Possible picture size: " + size.width + "x" + size.height
+        );
       if (Math.abs(ratio - targetRatio) > 0.1) continue;
 
+        Log.d(
+        TAG,
+        "Debug001 TEST EXACT Ratio" + ratio
+        );
+
       long pixels = (long) size.width * size.height;
-      if (pixels > maxPixels) {
         maxPixels = pixels;
-        optimalSize = size;
-      } else if (pixels == maxPixels) {
-        if (Math.abs(size.height - height) < minDiff) {
-          optimalSize = size;
-          minDiff = Math.abs(size.height - height);
+        if(size.width >= 1920 && size.height >= 1080){
+          Log.d(
+                  TAG,
+                  "Debug001 Checking For Size " + size.width + "x" + size.height
+          );
+          if((optimalSize == null) || size.width < optimalSize.width && size.height < optimalSize.height) {
+            if(optimalSize != null) {
+              Log.d(
+                      TAG,
+                      "Debug001 Old Optimal Size " + optimalSize.width + "x" + optimalSize.height
+              );
+            }
+            optimalSize = size;
+            Log.d(
+                    TAG,
+                    "Debug001 New Optimal Size " + optimalSize.width + "x" + optimalSize.height
+            );
+          }
         }
-      }
     }
 
     if (optimalSize == null) {
@@ -919,7 +944,7 @@ public class CameraActivity extends Fragment {
     }
     Log.d(
       TAG,
-      "Optimal picture size: " + optimalSize.width + "x" + optimalSize.height
+      "Debug001 Optimal picture size test " + optimalSize.width + "x" + optimalSize.height
     );
     return optimalSize;
   }
